@@ -476,19 +476,19 @@ function pingduo($boid, $bamout,$bprice, $oldp)
     $res = $obj -> takeOrder("", $instrumentId,"3",$sprice, $bamout,"0","4","0");
     if(is_array($res) && array_key_exists('order_id',$res))
     {
-		$soid = $res['order_id'];
-		if($soid != -1)
-		{
-			$pendingsids[$soid] = $boid;
-			$pendingsps[$soid] = $oldp;
-			return $soid;
-		}
-		else
-		{
-			echo "ping duo order -1\n";
-		}
+      $soid = $res['order_id'];
+      if($soid != -1)
+      {
+        $pendingsids[$soid] = $boid;
+        $pendingsps[$soid] = $oldp;
+        return $soid;
+      }
+      else
+      {
+        echo "ping duo order -1\n";
+      }
     }
-    if($d>1)
+    else
     {
         print_r($res);
     }
@@ -512,19 +512,19 @@ function pingkong($boid, $bamout,$bprice, $oldp)
     $res = $obj -> takeOrder("", $kinstrumentId,"4",$sprice, $bamout,"0","4","0");
     if(is_array($res) && array_key_exists('order_id',$res))
     {
-		$soid = $res['order_id'];
-		if($soid != -1)
-		{
-			$kongpendingsids[$soid] = $boid;
-			$kongpendingsps[$soid] = $oldp;
-			return $soid;
-		}
-		else
-		{
-			echo "ping kong order -1\n";
-		}
+      $soid = $res['order_id'];
+      if($soid != -1)
+      {
+        $kongpendingsids[$soid] = $boid;
+        $kongpendingsps[$soid] = $oldp;
+        return $soid;
+      }
+      else
+      {
+        echo "ping kong order -1\n";
+      }
     }
-    if($d>1)
+    else
     {
         print_r($res);
     }
@@ -566,42 +566,41 @@ function checkBuyOrder($oid, $duo)
         if($res['state'] == -1)
         {
             //order canceld;
-			if($duo)
-				$ordersid[$res['order_id']] = 0;
-			else
-				$kongordersid[$res['order_id']] = 0;
+          if($duo)
+            $ordersid[$res['order_id']] = 0;
+          else
+            $kongordersid[$res['order_id']] = 0;
         }
         else if($res['state'] == 2)
         {
             //order done
-			if($duo)
+          if($duo)
             {
-				$ordersid[$res['order_id']] = 0;
-				$newp = $res['price_avg']*(1+$gainRate);
-				if($isAgg)
-			             $newp = $res['price_avg']*(1+$gainRateAgg);
-				$lastDuoOid = pingduo($res['order_id'],$res['size'],$newp, $res['price_avg']); 
-				//$lastDuoDone = 2;
-			}
-			else
-			{
-				$newp = $res['price_avg']*(1-$gainRate);
-				$kongordersid[$res['order_id']] = 0;
-				$lastKongOid=pingkong($res['order_id'],$res['size'],$newp, $res['price_avg']); 
-				//$lastKongDone = 2;
-			}
+              $ordersid[$res['order_id']] = 0;
+              $newp = $res['price_avg']*(1+$gainRate);
+              if($isAgg)
+                  $newp = $res['price_avg']*(1+$gainRateAgg);
+              $lastDuoOid = pingduo($res['order_id'],$res['size'],$newp, $res['price_avg']); 
+              //$lastDuoDone = 2;
+            }
+            else
+            {
+              $newp = $res['price_avg']*(1-$gainRate);
+              $kongordersid[$res['order_id']] = 0;
+              $lastKongOid=pingkong($res['order_id'],$res['size'],$newp, $res['price_avg']); 
+              //$lastKongDone = 2;
+            }
         }
 	else
 	{
 	   $p = $res['price'];
 	   $oid = $res['order_id'];
-           if($duo)
+     if($duo)
 	   {
-
-		if($p >0 && $p*(1+$step) < $tickerPrice)
-		{
-			cancelOrder($oid, $duo);
-		}
+        if($p >0 && $p*(1+$step) < $tickerPrice)
+        {
+          cancelOrder($oid, $duo);
+        }
 	   }
 	   else
 	   {
@@ -657,91 +656,76 @@ function checkSellOrder( $oid, $boid, $duo)
         if($res['state'] == -1)
         {
             //sell cancel;
-	    $orderid = $res['order_id'];
-	$size = $res['size'];
-	if($duo){
+          $orderid = $res['order_id'];
+          $size = $res['size'];
+          if($duo){
             $pendingsids[$orderid] = 0;
             $pendingsps[$orderid] = 0;
             $ordersid[$boid]=0;
-	    $lastDuoDone = 0;
-	    if(array_key_exists($orderid, $cancelOids) && $cancelOids[$orderid] > 0)
-	    {
-		    //qiangping
-		    pingduo($orderid, $size, $tickerPrice-0.1);
-		    $qpd ++;
-		    $qpk =0;
-		    echo "qiangping duo: $size  with P:$tickerPrice \n";
-	    }
-        }
-        else
-	{
-            $kongpendingsids[$orderid]= 0;
-            $kongpendingsps[$orderid]= 0;
-	    $kongordersid[$boid]=0;	
-	    $lastKongDone = 0;	    
-	    if(array_key_exists($orderid, $cancelOids) && $cancelOids[$orderid] > 0)
-	    {
-		    pingkong($orderid, $size, $tickerPrice+0.1);
-		    $qpd =0;
-		    $qpk ++;
-		    echo "qiangping kong: $size with P:$tickerPrice \n";
-	    }
-	}
-	    $cancelOids[$orderid]= 0;
+            $lastDuoDone = 0;
+          }
+          else
+          {
+              $kongpendingsids[$orderid]= 0;
+              $kongpendingsps[$orderid]= 0;
+              $kongordersid[$boid]=0;	
+              $lastKongDone = 0;	    
+          }
+          $cancelOids[$orderid]= 0;
         }
         else if($res['state'] == 2)
         {
             //sell done;
-			$sdcnt ++;
-			if($duo){
-            $pendingsids[$res['order_id']] = 0;
-            $pendingsps[$res['order_id']] = 0;
-            echo "duo sell done $sdcnt \n";
-	    $lastDuoDone=0;
-			 }
-			else
-			{
-            $kongpendingsids[$res['order_id']] = 0;
-            $kongpendingsps[$res['order_id']] = 0;
-            echo "kong sell done $sdcnt \n";				
-	    $lastKongDone = 0;
-			}
-	}else
-	{
+          $sdcnt ++;
+          if($duo){
+                $pendingsids[$res['order_id']] = 0;
+                $pendingsps[$res['order_id']] = 0;
+                echo "duo sell done $sdcnt \n";
+                $lastDuoDone=0;
+           }
+          else
+          {
+                $kongpendingsids[$res['order_id']] = 0;
+                $kongpendingsps[$res['order_id']] = 0;
+                echo "kong sell done $sdcnt \n";				
+                $lastKongDone = 0;
+          }
+        }
+        else
+        {
 
-	    $size = $res['size'];
-		if($duo)
-		{
-	           $totalduo += $size;
-		   $refp = $pendingsps[$res['order_id']];
-		   if($refp > 0 && $tickerPrice < ($refp * (1-$gainRate-$cancelOrderRate)))
-		   {
-			   $cancelOids[$res['order_id']] = 1;
-		   }
-		}
-		else
-		{
-	           $totalkong += $size;
-		   $refp = $kongpendingsps[$res['order_id']];
-                   if($refp >0 && $tickerPrice > ($refp * (1+$cancelOrderRate)))
-                   {
-                           $cancelOids[$res['order_id']] = 1;
-                   }
+          $size = $res['size'];
+          if($duo)
+          {
+             $totalduo += $size;
+             $refp = $pendingsps[$res['order_id']];
+             if($refp > 0 && $tickerPrice < ($refp * (1-$gainRate-$cancelOrderRate)))
+             {
+               $cancelOids[$res['order_id']] = 1;
+             }
+          }
+          else
+          {
+             $totalkong += $size;
+             $refp = $kongpendingsps[$res['order_id']];
+             if($refp >0 && $tickerPrice > ($refp * (1+$cancelOrderRate)))
+             {
+                 $cancelOids[$res['order_id']] = 1;
+             }
 
-		}
- 
-	}
+          }       
+        }
             
     }
     else if(is_array($res)  && array_key_exists('code',$res) && $res['code']==35029)
     {
-	if($duo)
-         	$ordersid[$boid]=0;
-	else
-		$kongordersid[$boid]=0;
+      if($duo)
+        $ordersid[$boid]=0;
+      else
+        $kongordersid[$boid]=0;
     }
-    if($d>1)
-    print_r($res);
+    else
+      print_r($res);
 }
 function cancelOrder($oid, $duo=1)
 {
@@ -767,6 +751,16 @@ function printArray(&$arr, $tag)
     {
         echo "key is:$key, value is:$value\n";
     }
+}
+function syncArray(&$sids, &$sps)
+{
+   foreach($sids as $key=>$value)
+   {
+      if($value <= 0)
+      {
+          $sps[$key] = 0;
+      }
+   }
 }
 function cleanEmptyArray(&$arr)
 {
@@ -795,7 +789,7 @@ function realAB($cnt,$tickerprice)
         $kongamt = 0;
 	if($res)
 	{
-           $avalp = 'avail_position';
+     $avalp = 'avail_position';
 	   for($i=0;$i<count($res['holding']);$i++)
 	   {
 		   if($res['holding'][$i]['side'] == 'short')
@@ -893,30 +887,30 @@ function checkOrders()
    }
    if($updatesellorders)
    { 
-	$cnt = $updatesellorders;
-	rsort($pendingsps);
-   foreach($pendingsps as $key=>$value)
-   {
-       if($value <= 0)
-	       continue;
-       $cnt --;
-       checkSellOrder($key, $value,true);
-       usleep(500);
-       if($cnt <= 0)
-	    break;
-   }
+       $cnt = $updatesellorders;
+       arsort($pendingsids);
+       foreach($pendingsids as $key=>$value)
+       {
+           if($value <= 0)
+             continue;
+           $cnt --;
+           checkSellOrder($key, $value,true);
+           usleep(500);
+           if($cnt <= 0)
+          break;
+       }
        $cnt = $updatesellorders; 
-        rsort($kongpendingsps);
-   foreach($kongpendingsps as $key=>$value)
-   {
-       if($value <= 0)
-           continue;
-       $cnt --;
-       checkSellOrder($key, $value,false);
-       usleep(500);
-       if($cnt <= 0)
-	    break;
-   }
+       arsort($kongpendingsids);
+       foreach($kongpendingsids as $key=>$value)
+       {
+           if($value <= 0)
+               continue;
+           $cnt --;
+           checkSellOrder($key, $value,false);
+           usleep(500);
+           if($cnt <= 0)
+          break;
+       }
    } 
    foreach($cancelOids as $key=>$value)
    {
@@ -931,9 +925,6 @@ function checkOrders()
 
 while(true)
 {
-
-//sleep(2);
-
 try {
         include 'swap-c.php';
 		$kongp = 0;
@@ -1029,6 +1020,8 @@ try {
         cleanEmptyArray($kongpendingsids);
         cleanEmptyArray($kongpendingsps);
         cleanEmptyArray($cancelOids);
+        syncArray($pendingsids, $pendingsps);
+        syncArray($kongpendingsids, $kongpendingsps);
         if($d>0)
         {
             echo "tick is $tick\n";
@@ -1051,4 +1044,5 @@ try {
 }
 
 ?>
+
 
